@@ -1,6 +1,6 @@
 import argparse
 
-from stancylib.run_classifier import run_
+from stancylib.run_classifier import train_eval
 
 
 def main():
@@ -98,7 +98,7 @@ def main():
     parser.add_argument('--server_ip', type=str, default='', help="Can be used for distant debugging.")
     parser.add_argument('--server_port', type=str, default='', help="Can be used for distant debugging.")
     args = parser.parse_args()
-    run_(**args.__dict__)
+    train_eval(**args.__dict__)
 
 
 if __name__ == '__main__':

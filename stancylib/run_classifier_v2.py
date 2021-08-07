@@ -31,24 +31,22 @@ from tqdm import tqdm, trange
 
 from sklearn.metrics import classification_report
 
+from stancylib.BertForSequenceClassificationDualLossV2 import BertForSequenceClassificationDualLossV2
 from stancylib.file_utils import PYTORCH_PRETRAINED_BERT_CACHE
-from stancylib.modeling import (BertConfig, WEIGHTS_NAME, CONFIG_NAME,
-                                BertForSequenceClassificationDualLoss, BertForSequenceClassification)
-from pytorch_pretrained_bert.tokenization import BertTokenizer
-from pytorch_pretrained_bert.optimization import BertAdam, warmup_linear
+from stancylib.modeling import WEIGHTS_NAME, CONFIG_NAME
+
+from transformers import AdamW, get_linear_schedule_with_warmup
+from transformers import BertConfig, BertForSequenceClassification, BertTokenizer
+from torch.nn import functional as F
 
 from stancylib.processor import (ColaProcessor, MnliProcessor, Sst2Processor, StanceProcessor,
                                  MrpcProcessor, convert_examples_to_features, ProconProcessor)
+from stancylib.run_classifier import accuracy
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(name)s -   %(message)s',
                     datefmt='%m/%d/%Y %H:%M:%S',
                     level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-
-def accuracy(out, labels):
-    outputs = np.argmax(out, axis=1)
-    return np.sum(outputs == labels)
 
 
 def train_eval(data_dir: str, bert_model: str, task_name: str, output_dir: str,
@@ -179,7 +177,7 @@ def train_eval(data_dir: str, bert_model: str, task_name: str, output_dir: str,
     task_name = task_name.lower()
 
     if task_name not in processors:
-        raise ValueError("Task not found: %s" % (task_name))
+        raise ValueError("Task not found: %s" % task_name)
 
     processor = processors[task_name]()
     num_labels = num_labels_task[task_name]
@@ -201,9 +199,9 @@ def train_eval(data_dir: str, bert_model: str, task_name: str, output_dir: str,
                                                          'distributed_{}'.format(local_rank))
 
     if dual_model:
-        model = BertForSequenceClassificationDualLoss.from_pretrained(bert_model,
-                                                                      cache_dir=cache_dir,
-                                                                      num_labels=num_labels)
+        model = BertForSequenceClassificationDualLossV2.from_pretrained(bert_model,
+                                                                        cache_dir=cache_dir,
+                                                                        num_labels=num_labels)
     else:
         model = BertForSequenceClassification.from_pretrained(bert_model,
                                                               cache_dir=cache_dir,
@@ -230,6 +228,7 @@ def train_eval(data_dir: str, bert_model: str, task_name: str, output_dir: str,
         {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)], 'weight_decay': 0.01},
         {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)], 'weight_decay': 0.0}
     ]
+
     if fp16:
         try:
             from apex.optimizers import FP16_Optimizer
@@ -248,10 +247,9 @@ def train_eval(data_dir: str, bert_model: str, task_name: str, output_dir: str,
             optimizer = FP16_Optimizer(optimizer, static_loss_scale=loss_scale)
 
     else:
-        optimizer = BertAdam(optimizer_grouped_parameters,
-                             lr=learning_rate,
-                             warmup=warmup_proportion,
-                             t_total=num_train_optimization_steps)
+        optimizer = AdamW(optimizer_grouped_parameters, lr=learning_rate)
+    scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=warmup_proportion,
+                                                num_training_steps=num_train_optimization_steps)
 
     output_model_file = os.path.join(output_dir, WEIGHTS_NAME)
     global_step = 0
@@ -284,11 +282,12 @@ def train_eval(data_dir: str, bert_model: str, task_name: str, output_dir: str,
             for step, batch in enumerate(process_bar):
                 batch = tuple(t.to(device) for t in batch)
                 input_ids, input_mask, segment_ids, label_ids, sim_label_ids = batch
+                optimizer.zero_grad()
 
                 if dual_model:
-                    loss = model(input_ids, segment_ids, input_mask, label_ids, sim_label_ids)
+                    loss = model(input_ids, segment_ids, input_mask, label_ids, sim_label_ids).loss
                 else:
-                    loss = model(input_ids, segment_ids, input_mask, label_ids)
+                    loss = model(input_ids, segment_ids, input_mask, label_ids).loss
 
                 if n_gpu > 1:
                     loss = loss.mean()  # mean() to average on multi-gpu.
@@ -306,15 +305,8 @@ def train_eval(data_dir: str, bert_model: str, task_name: str, output_dir: str,
                 nb_tr_examples += input_ids.size(0)
                 nb_tr_steps += 1
                 if (step + 1) % gradient_accumulation_steps == 0:
-                    if fp16:
-                        # modify learning rate with special warm up BERT uses
-                        # if fp16 is False, BertAdam is used that handles this automatically
-                        lr_this_step = learning_rate * warmup_linear(global_step / num_train_optimization_steps,
-                                                                     warmup_proportion)
-                        for param_group in optimizer.param_groups:
-                            param_group['lr'] = lr_this_step
                     optimizer.step()
-                    optimizer.zero_grad()
+                    scheduler.step()
                     global_step += 1
             print("\nLoss: {}\n".format(tr_loss / nb_tr_steps))
 
@@ -326,15 +318,15 @@ def train_eval(data_dir: str, bert_model: str, task_name: str, output_dir: str,
             f.write(model_to_save.config.to_json_string())
 
         # Load a trained model and config that you have fine-tuned
-        config = BertConfig(output_config_file)
+        config = BertConfig(output_config_file, num_labels=num_labels)
 
         if dual_model:
-            model = BertForSequenceClassificationDualLoss(config, num_labels=num_labels)
+            model = BertForSequenceClassificationDualLossV2(config)
         else:
-            model = BertForSequenceClassification(config, num_labels=num_labels)
+            model = BertForSequenceClassification(config)
         model.load_state_dict(torch.load(output_model_file))
     else:
-        model = BertForSequenceClassificationDualLoss.from_pretrained(bert_model, num_labels=num_labels)
+        model = BertForSequenceClassificationDualLossV2.from_pretrained(bert_model, num_labels=num_labels)
         model.load_state_dict(torch.load(output_model_file)) if pretrined else None
     model.to(device)
 
@@ -380,7 +372,7 @@ def train_eval(data_dir: str, bert_model: str, task_name: str, output_dir: str,
                     tmp_eval_loss = model(input_ids, segment_ids, input_mask, label_ids)
                     logits = model(input_ids, segment_ids, input_mask)
 
-                predicted_prob.extend(torch.nn.functional.softmax(logits, dim=1))
+                predicted_prob.extend(F.softmax(logits, dim=1))
 
             logits = logits.detach().cpu().numpy()
 
