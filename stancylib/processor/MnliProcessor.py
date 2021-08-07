@@ -1,7 +1,7 @@
 import os
 
-from stancylib.processor.DataProcessor import DataProcessor
-from stancylib.processor.InputExample import InputExample
+from DataProcessor import DataProcessor
+from InputExample import InputExample
 
 
 class MnliProcessor(DataProcessor):
