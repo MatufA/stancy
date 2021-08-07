@@ -46,11 +46,6 @@ logging.basicConfig(format='%(asctime)s - %(levelname)s - %(name)s -   %(message
 logger = logging.getLogger(__name__)
 
 
-def accuracy(out, labels):
-    outputs = np.argmax(out, axis=1)
-    return np.sum(outputs == labels)
-
-
 def train_eval(data_dir: str, bert_model: str, task_name: str, output_dir: str,
                cache_dir: str = '', max_seq_length: int = 128, do_train: bool = False,
                do_eval: bool = False, do_lower_case: bool = False, train_batch_size: int = 32,
