@@ -308,6 +308,9 @@ def train_eval(data_dir: str, bert_model: str, task_name: str, output_dir: str,
                     optimizer.step()
                     scheduler.step()
                     global_step += 1
+
+                # clear gpu memory
+                tuple(t.detach().cpu().numpy() for t in batch) if n_gpu > 0 else None
             print("\nLoss: {}\n".format(tr_loss / nb_tr_steps))
 
         # Save a trained model and the associated configuration
@@ -388,6 +391,14 @@ def train_eval(data_dir: str, bert_model: str, task_name: str, output_dir: str,
 
             nb_eval_examples += input_ids.size(0)
             nb_eval_steps += 1
+
+            # clear gpu memory
+            if n_gpu > 0:
+                input_ids.detach().cpu()
+                input_mask.detach().cpu()
+                segment_ids.detach().cpu()
+                label_ids.detach().cpu()
+                sim_label_ids.detach().cpu()
 
         eval_loss = eval_loss / nb_eval_steps
         eval_accuracy = eval_accuracy / nb_eval_examples
