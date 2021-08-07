@@ -9,6 +9,9 @@ from .StanceProcessor import StanceProcessor
 from .MrpcProcessor import MrpcProcessor
 from .ProconProcessor import ProconProcessor
 
+import sys
+sys.path.append('../processor')
+
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(name)s -   %(message)s',
                     datefmt='%m/%d/%Y %H:%M:%S',
                     level=logging.INFO)

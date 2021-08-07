@@ -1,7 +1,7 @@
 import os
 
-from DataProcessor import DataProcessor
-from InputExample import InputExample
+from .DataProcessor import DataProcessor
+from .InputExample import InputExample
 
 
 class ProconProcessor(DataProcessor):
