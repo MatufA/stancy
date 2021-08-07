@@ -30,10 +30,8 @@ class BertForSequenceClassificationDualLossV2(BertPreTrainedModel):
         self.config = config
 
         self.bert = BertModel(config)
-        classifier_dropout = (
-            config.classifier_dropout if config.classifier_dropout is not None else config.hidden_dropout_prob
-        )
-        self.dropout = nn.Dropout(classifier_dropout)
+
+        self.dropout = nn.Dropout(config.hidden_dropout_prob)
         self.classifier = nn.Linear(config.hidden_size + 1, config.num_labels)
 
         # addition

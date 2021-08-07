@@ -40,8 +40,8 @@ from transformers import BertConfig, BertForSequenceClassification, BertTokenize
 from torch.nn import functional as F
 
 from processor import (ColaProcessor, MnliProcessor, Sst2Processor, StanceProcessor,
-                                 MrpcProcessor, convert_examples_to_features, ProconProcessor)
-
+                       MrpcProcessor, convert_examples_to_features, ProconProcessor)
+from utils import accuracy
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(name)s -   %(message)s',
                     datefmt='%m/%d/%Y %H:%M:%S',
