@@ -31,14 +31,14 @@ from tqdm import tqdm, trange
 
 from sklearn.metrics import classification_report
 
-from stancylib.file_utils import PYTORCH_PRETRAINED_BERT_CACHE
-from stancylib.modeling import (BertConfig, WEIGHTS_NAME, CONFIG_NAME,
-                                BertForSequenceClassificationDualLoss, BertForSequenceClassification)
+from file_utils import PYTORCH_PRETRAINED_BERT_CACHE
+from modeling import (BertConfig, WEIGHTS_NAME, CONFIG_NAME,
+                      BertForSequenceClassificationDualLoss, BertForSequenceClassification)
 from pytorch_pretrained_bert.tokenization import BertTokenizer
 from pytorch_pretrained_bert.optimization import BertAdam, warmup_linear
 
-from stancylib.processor import (ColaProcessor, MnliProcessor, Sst2Processor, StanceProcessor,
-                                 MrpcProcessor, convert_examples_to_features, ProconProcessor)
+from processor import (ColaProcessor, MnliProcessor, Sst2Processor, StanceProcessor,
+                       MrpcProcessor, convert_examples_to_features, ProconProcessor)
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(name)s -   %(message)s',
                     datefmt='%m/%d/%Y %H:%M:%S',

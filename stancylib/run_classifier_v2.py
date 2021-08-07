@@ -31,17 +31,17 @@ from tqdm import tqdm, trange
 
 from sklearn.metrics import classification_report
 
-from stancylib.BertForSequenceClassificationDualLossV2 import BertForSequenceClassificationDualLossV2
-from stancylib.file_utils import PYTORCH_PRETRAINED_BERT_CACHE
-from stancylib.modeling import WEIGHTS_NAME, CONFIG_NAME
+from BertForSequenceClassificationDualLossV2 import BertForSequenceClassificationDualLossV2
+from file_utils import PYTORCH_PRETRAINED_BERT_CACHE
+from modeling import WEIGHTS_NAME, CONFIG_NAME
 
 from transformers import AdamW, get_linear_schedule_with_warmup
 from transformers import BertConfig, BertForSequenceClassification, BertTokenizer
 from torch.nn import functional as F
 
-from stancylib.processor import (ColaProcessor, MnliProcessor, Sst2Processor, StanceProcessor,
+from processor import (ColaProcessor, MnliProcessor, Sst2Processor, StanceProcessor,
                                  MrpcProcessor, convert_examples_to_features, ProconProcessor)
-from stancylib.run_classifier import accuracy
+
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(name)s -   %(message)s',
                     datefmt='%m/%d/%Y %H:%M:%S',
