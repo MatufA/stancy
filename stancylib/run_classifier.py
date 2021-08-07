@@ -31,7 +31,7 @@ from tqdm import tqdm, trange
 
 from sklearn.metrics import classification_report
 
-from pytorch_pretrained_bert.file_utils import PYTORCH_PRETRAINED_BERT_CACHE
+from .file_utils import PYTORCH_PRETRAINED_BERT_CACHE
 from stancylib.modeling import (BertConfig, WEIGHTS_NAME, CONFIG_NAME,
                                 BertForSequenceClassificationDualLoss, BertForSequenceClassification)
 from pytorch_pretrained_bert.tokenization import BertTokenizer
