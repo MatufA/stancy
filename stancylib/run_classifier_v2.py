@@ -184,7 +184,11 @@ def train_eval(data_dir: str, bert_model: str, task_name: str, output_dir: str,
     num_labels = num_labels_task[task_name]
     label_list = processor.get_labels()
 
-    tokenizer = BertTokenizer.from_pretrained(bert_model, do_lower_case=do_lower_case)
+    tokenizer = BertTokenizer.from_pretrained(bert_model,
+                                              do_lower_case=do_lower_case,
+                                              truncation=True,
+                                              padding=True,
+                                              return_tensors='pt')
 
     train_examples = None
     num_train_optimization_steps = None
