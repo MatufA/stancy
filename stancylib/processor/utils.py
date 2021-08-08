@@ -93,12 +93,14 @@ def convert_examples_to_features(examples, label_list, seq_length, tokenizer):
 
         if ex_index < 5:
             logger.info("*** Example ***")
-            logger.info("unique_id: %s" % (example.unique_id))
+            logger.info("unique_id: %s" % example.guid)
             logger.info("tokens: %s" % " ".join([str(x) for x in tokens]))
             logger.info("input_ids: %s" % " ".join([str(x) for x in input_ids]))
             logger.info("input_mask: %s" % " ".join([str(x) for x in input_mask]))
             logger.info(
                 "input_type_ids: %s" % " ".join([str(x) for x in input_type_ids]))
+            logger.info("label: %s (id = %d)" % (example.label, label_id))
+            logger.info("sim_label: %s (id = %d)" % (example.label, sim_label_id))
 
         features.append(
             InputFeatures(
