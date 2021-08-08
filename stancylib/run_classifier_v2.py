@@ -40,7 +40,8 @@ from transformers import BertConfig, BertForSequenceClassification, BertTokenize
 from torch.nn import functional as F
 
 from processor import (ColaProcessor, MnliProcessor, Sst2Processor, StanceProcessor,
-                       MrpcProcessor, convert_examples_to_features, ProconProcessor)
+                       MrpcProcessor, ProconProcessor)
+from processor.utils import convert_examples_to_features
 from utils import accuracy
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(name)s -   %(message)s',
@@ -285,9 +286,16 @@ def train_eval(data_dir: str, bert_model: str, task_name: str, output_dir: str,
                 optimizer.zero_grad()
 
                 if dual_model:
-                    loss = model(input_ids, segment_ids, input_mask, label_ids, sim_label_ids).loss
+                    loss = model(input_ids=input_ids,
+                                 token_type_ids=segment_ids,
+                                 attention_mask=input_mask,
+                                 labels=label_ids,
+                                 sim_labels=sim_label_ids).loss
                 else:
-                    loss = model(input_ids, segment_ids, input_mask, label_ids).loss
+                    loss = model(input_ids=input_ids,
+                                 token_type_ids=segment_ids,
+                                 attention_mask=input_mask,
+                                 labels=label_ids).loss
 
                 if n_gpu > 1:
                     loss = loss.mean()  # mean() to average on multi-gpu.
