@@ -16,11 +16,11 @@ def convert_examples_to_features(examples, label_list, seq_length, tokenizer):
 
     features = []
     for (ex_index, example) in enumerate(examples):
-        tokens_a = tokenizer.tokenize(example.text_a)
+        tokens_a = tokenizer.tokenize(example.text_a, truncation=True, padding=True, return_tensors='pt')
 
         tokens_b = None
         if example.text_b:
-            tokens_b = tokenizer.tokenize(example.text_b)
+            tokens_b = tokenizer.tokenize(example.text_b, truncation=True, padding=True, return_tensors='pt')
 
         if tokens_b:
             # Modifies `tokens_a` and `tokens_b` in place so that the total
