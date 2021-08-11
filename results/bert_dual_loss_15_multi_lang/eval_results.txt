@@ -1,0 +1,35 @@
+alpha=0.5
+bert_model=bert-base-multilingual-cased
+cache_dir=./stancy/BERT_CACHE/
+data_dir=/content/stancy/data/multi-lang
+do_eval=True
+do_lower_case=True
+do_train=False
+eval_batch_size=8
+fp16=False
+gradient_accumulation_steps=1
+learning_rate=1e-05
+local_rank=-1
+loss_scale=0.0
+max_seq_length=128
+no_cuda=False
+num_train_epochs=15
+output_dir=/content/stancy/results/bert_dual_loss_15_multi_lang
+seed=42
+server_ip=
+server_port=
+task_name=multi_lang
+train_batch_size=24
+warmup_proportion=0.1
+eval_accuracy = 0.5514128850150439
+eval_loss = 2.4256735270427514
+global_step = 0
+loss = None
+              precision    recall  f1-score   support
+
+    supports     0.5413    0.7420    0.6260     32618
+     refutes     0.5743    0.3563    0.4397     31860
+
+    accuracy                         0.5514     64478
+   macro avg     0.5578    0.5491    0.5329     64478
+weighted avg     0.5576    0.5514    0.5339     64478
