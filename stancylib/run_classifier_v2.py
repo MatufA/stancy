@@ -391,8 +391,7 @@ def train_eval(data_dir: str, bert_model: str, task_name: str, output_dir: str,
                                           sim_labels=sim_label_ids).loss
                     logits = model(input_ids=input_ids,
                                    token_type_ids=segment_ids,
-                                   attention_mask=input_mask,
-                                   labels=label_ids).logits
+                                   attention_mask=input_mask).logits
                 else:
                     tmp_eval_loss = model(input_ids=input_ids,
                                           token_type_ids=segment_ids,
@@ -400,8 +399,7 @@ def train_eval(data_dir: str, bert_model: str, task_name: str, output_dir: str,
                                           labels=label_ids).loss
                     logits = model(input_ids=input_ids,
                                    token_type_ids=segment_ids,
-                                   attention_mask=input_mask,
-                                   labels=label_ids).logits
+                                   attention_mask=input_mask).logits
 
                 predicted_prob.extend(F.softmax(logits, dim=1))
 
