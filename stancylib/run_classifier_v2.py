@@ -423,7 +423,6 @@ def train_eval(data_dir: str, bert_model: str, task_name: str, output_dir: str,
                 input_ids.detach().cpu()
                 input_mask.detach().cpu()
                 segment_ids.detach().cpu()
-                label_ids.detach().cpu()
                 sim_label_ids.detach().cpu()
 
         eval_loss = eval_loss / nb_eval_steps
