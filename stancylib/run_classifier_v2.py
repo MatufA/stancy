@@ -40,7 +40,7 @@ from transformers import BertConfig, BertForSequenceClassification, BertTokenize
 from torch.nn import functional as F
 
 from processor import (ColaProcessor, MnliProcessor, Sst2Processor, StanceProcessor,
-                       MrpcProcessor, ProconProcessor)
+                       MrpcProcessor, ProconProcessor, MultiLangProcessor)
 from processor.utils import convert_examples_to_features
 from utils import accuracy
 
@@ -131,7 +131,8 @@ def train_eval(data_dir: str, bert_model: str, task_name: str, output_dir: str,
         "mrpc": MrpcProcessor,
         "sst-2": Sst2Processor,
         "stance": StanceProcessor,
-        "procon": ProconProcessor
+        "procon": ProconProcessor,
+        "multi-lang": MultiLangProcessor
     }
 
     num_labels_task = {
@@ -140,7 +141,9 @@ def train_eval(data_dir: str, bert_model: str, task_name: str, output_dir: str,
         "mnli": 3,
         "mrpc": 2,
         "stance": 2,
-        "procon": 2
+        "procon": 2,
+        "multi-lang": 2
+
     }
 
     if local_rank == -1 or no_cuda:
