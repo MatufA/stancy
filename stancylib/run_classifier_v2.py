@@ -132,7 +132,7 @@ def train_eval(data_dir: str, bert_model: str, task_name: str, output_dir: str,
         "sst-2": Sst2Processor,
         "stance": StanceProcessor,
         "procon": ProconProcessor,
-        "multi-lang": MultiLangProcessor
+        "multi_lang": MultiLangProcessor
     }
 
     num_labels_task = {
