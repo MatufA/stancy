@@ -8,6 +8,7 @@ from .Sst2Processor import Sst2Processor
 from .StanceProcessor import StanceProcessor
 from .MrpcProcessor import MrpcProcessor
 from .ProconProcessor import ProconProcessor
+from .MultiLangProcessor import MultiLangProcessor
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(name)s -   %(message)s',
                     datefmt='%m/%d/%Y %H:%M:%S',
@@ -125,4 +126,4 @@ def _truncate_seq_pair(tokens_a, tokens_b, max_length):
 
 __all__ = [InputExample, InputFeatures, DataProcessor, ColaProcessor,
            MnliProcessor, Sst2Processor, StanceProcessor, MrpcProcessor,
-           ProconProcessor, convert_examples_to_features]
+           ProconProcessor, convert_examples_to_features, MultiLangProcessor]
