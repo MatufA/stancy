@@ -142,7 +142,7 @@ def train_eval(data_dir: str, bert_model: str, task_name: str, output_dir: str,
         "mrpc": 2,
         "stance": 2,
         "procon": 2,
-        "multi-lang": 2
+        "multi_lang": 2
 
     }
 
