@@ -52,7 +52,7 @@ logger = logging.getLogger(__name__)
 
 def get_model(dual_model, output_model_file, output_config_file, num_labels):
     # Load a trained model and config that you have fine-tuned
-    config = BertConfig(output_config_file, num_labels=num_labels)
+    config = BertConfig.from_json_file(output_config_file)
     if dual_model:
         model = BertForSequenceClassificationDualLossV2(config)
     else:
