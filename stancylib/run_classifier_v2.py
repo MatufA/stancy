@@ -50,6 +50,17 @@ logging.basicConfig(format='%(asctime)s - %(levelname)s - %(name)s -   %(message
 logger = logging.getLogger(__name__)
 
 
+def get_model(dual_model, output_model_file, output_config_file, num_labels):
+    # Load a trained model and config that you have fine-tuned
+    config = BertConfig(output_config_file, num_labels=num_labels)
+    if dual_model:
+        model = BertForSequenceClassificationDualLossV2(config)
+    else:
+        model = BertForSequenceClassification(config)
+    model.load_state_dict(torch.load(output_model_file))
+    return model
+
+
 def train_eval(data_dir: str, bert_model: str, task_name: str, output_dir: str,
                cache_dir: str = '', max_seq_length: int = 128, do_train: bool = False,
                do_eval: bool = False, do_lower_case: bool = False, train_batch_size: int = 32,
@@ -260,6 +271,7 @@ def train_eval(data_dir: str, bert_model: str, task_name: str, output_dir: str,
                                                 num_training_steps=num_train_optimization_steps)
 
     output_model_file = os.path.join(output_dir, WEIGHTS_NAME)
+    output_config_file = os.path.join(output_dir, CONFIG_NAME)
     global_step = 0
     nb_tr_steps = 0
     tr_loss = 0
@@ -331,21 +343,19 @@ def train_eval(data_dir: str, bert_model: str, task_name: str, output_dir: str,
         # Save a trained model and the associated configuration
         model_to_save = model.module if hasattr(model, 'module') else model  # Only save the model it-self
         torch.save(model_to_save.state_dict(), output_model_file)
-        output_config_file = os.path.join(output_dir, CONFIG_NAME)
         with open(output_config_file, 'w') as f:
             f.write(model_to_save.config.to_json_string())
 
-        # Load a trained model and config that you have fine-tuned
-        config = BertConfig(output_config_file, num_labels=num_labels)
-
-        if dual_model:
-            model = BertForSequenceClassificationDualLossV2(config)
-        else:
-            model = BertForSequenceClassification(config)
-        model.load_state_dict(torch.load(output_model_file))
+        model = get_model(dual_model, output_model_file, output_config_file, num_labels)
+        # if dual_model:
+        #     model = BertForSequenceClassificationDualLossV2(config)
+        # else:
+        #     model = BertForSequenceClassification(config)
+        # model.load_state_dict(torch.load(output_model_file))
     else:
-        model = BertForSequenceClassificationDualLossV2.from_pretrained(bert_model, num_labels=num_labels)
-        model.load_state_dict(torch.load(output_model_file)) if pretrined else None
+        model = get_model(dual_model, output_model_file, output_config_file, num_labels)
+        # model = BertForSequenceClassificationDualLossV2.from_pretrained(bert_model, num_labels=num_labels)
+        # model.load_state_dict(torch.load(output_model_file)) if pretrined else None
     model.to(device)
 
     if do_eval and (local_rank == -1 or torch.distributed.get_rank() == 0):
